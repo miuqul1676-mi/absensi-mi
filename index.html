@@ -1,0 +1,1723 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Absensi MI Riyadlatul Uqul</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    html {
+      height: 100%;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="bg-gradient-to-br from-blue-50 to-purple-50">
+  <div id="app" class="h-full overflow-auto"><!-- Navigation -->
+   <nav class="bg-white shadow-lg no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex justify-between h-16">
+      <div class="flex items-center">
+       <div class="flex-shrink-0 flex items-center"><span class="text-2xl">🏫</span>
+        <div class="ml-3">
+         <h1 id="appTitle" class="text-xl font-bold text-gray-800">MADRASAH IBTIDAIYAH RIYADLATUL UQUL NGADILUWIH</h1>
+         <p id="appSubtitle" class="text-sm text-gray-600">Sistem Absensi Guru dan Karyawan</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </nav><!-- Main Content -->
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"><!-- Menu Tabs -->
+    <div class="mb-6 no-print">
+     <div class="flex flex-wrap gap-2"><button onclick="showPage('dashboard')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-dashboard">📊 Dashboard</button> <button onclick="showPage('dataGuru')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-dataGuru">👥 Data Guru/Karyawan</button> <button onclick="showPage('inputAbsensi')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-inputAbsensi">✍️ Input Absensi</button> <button onclick="showPage('dataAbsensi')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-dataAbsensi">📋 Data Absensi</button> <button onclick="showPage('ajuanIzin')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-ajuanIzin">📝 Ajuan Izin</button> <button onclick="showPage('ajuanCuti')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-ajuanCuti">🏖️ Ajuan Cuti</button> <button onclick="showPage('kartuAbsen')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-kartuAbsen">🎫 Kartu Absen</button> <button onclick="showPage('hariLibur')" class="px-4 py-2 rounded-lg font-medium transition-all" id="tab-hariLibur">📅 Hari Libur</button>
+     </div>
+    </div><!-- Dashboard Page -->
+    <div id="page-dashboard" class="page-content">
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="card p-6">
+       <div class="flex items-center justify-between">
+        <div>
+         <p class="text-gray-600 text-sm">Total Guru/Karyawan</p>
+         <p id="totalGuru" class="text-3xl font-bold text-purple-600">0</p>
+        </div><span class="text-4xl">👥</span>
+       </div>
+      </div>
+      <div class="card p-6">
+       <div class="flex items-center justify-between">
+        <div>
+         <p class="text-gray-600 text-sm">Hadir Hari Ini</p>
+         <p id="hadirHariIni" class="text-3xl font-bold text-green-600">0</p>
+        </div><span class="text-4xl">✅</span>
+       </div>
+      </div>
+      <div class="card p-6">
+       <div class="flex items-center justify-between">
+        <div>
+         <p class="text-gray-600 text-sm">Izin/Sakit</p>
+         <p id="izinSakit" class="text-3xl font-bold text-yellow-600">0</p>
+        </div><span class="text-4xl">📋</span>
+       </div>
+      </div>
+      <div class="card p-6">
+       <div class="flex items-center justify-between">
+        <div>
+         <p class="text-gray-600 text-sm">Terlambat</p>
+         <p id="terlambat" class="text-3xl font-bold text-red-600">0</p>
+        </div><span class="text-4xl">⏰</span>
+       </div>
+      </div>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Absensi Hari Ini</h2>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Masuk</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Pulang</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+         </tr>
+        </thead>
+        <tbody id="dashboardAbsensiList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Data Guru/Karyawan Page -->
+    <div id="page-dataGuru" class="page-content hidden">
+     <div class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Tambah Guru/Karyawan</h2>
+      <form id="formGuru" class="space-y-4">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="namaGuru" class="block text-sm font-medium text-gray-700 mb-1">Nama</label> <input type="text" id="namaGuru" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        <div><label for="jabatanGuru" class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label> <input type="text" id="jabatanGuru" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium"> <span id="btnGuruText">💾 Simpan</span> </button> <button type="button" onclick="resetFormGuru()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Reset</button>
+       </div>
+      </form>
+     </div>
+     <div class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Import Data (Copy-Paste)</h2>
+      <p class="text-sm text-gray-600 mb-2">Format: Nama | Jabatan (satu baris per guru/karyawan)</p><textarea id="bulkImport" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-2" placeholder="Contoh:
+Ahmad Fauzi | Kepala Madrasah
+Siti Aminah | Guru Kelas 1"></textarea> <button onclick="importBulkData()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">📥 Import Data</button>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Guru/Karyawan</h2>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="guruList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Input Absensi Page -->
+    <div id="page-inputAbsensi" class="page-content hidden">
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Input Absensi Masuk</h2>
+      <p class="text-sm text-gray-600 mb-4">Catatan: Untuk input jam pulang, silakan edit di menu <strong>Data Absensi</strong></p>
+      <form id="formAbsensi" class="space-y-4">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="namaAbsen" class="block text-sm font-medium text-gray-700 mb-1">Nama Guru/Karyawan</label> <select id="namaAbsen" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="">Pilih Guru/Karyawan</option> </select>
+        </div>
+        <div><label for="jabatanAbsen" class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label> <input type="text" id="jabatanAbsen" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+        </div>
+       </div>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="tanggalAbsen" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label> <input type="date" id="tanggalAbsen" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        <div><label for="statusAbsen" class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label> <select id="statusAbsen" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="Hadir">1. Hadir</option> <option value="Izin">2. Izin</option> <option value="Sakit">3. Sakit</option> <option value="Cuti">4. Cuti</option> </select>
+        </div>
+       </div>
+       <div class="border-t pt-4">
+        <h3 class="font-semibold mb-3 text-gray-700">Jam Masuk</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div><label for="jamMasuk" class="block text-sm font-medium text-gray-700 mb-1">Jam Masuk</label> <input type="time" id="jamMasuk" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+         </div>
+         <div class="flex items-end"><button type="button" onclick="setJamSekarang('jamMasuk')" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">🕐 Sekarang</button>
+         </div>
+        </div>
+       </div>
+       <div><label for="keteranganAbsen" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label> <textarea id="keteranganAbsen" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">💾 Simpan Absensi</button> <button type="button" onclick="resetFormAbsensi()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Reset</button>
+       </div>
+      </form>
+     </div>
+    </div><!-- Data Absensi Page -->
+    <div id="page-dataAbsensi" class="page-content hidden">
+     <div class="card p-6 mb-6 no-print">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Filter Data Absensi</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+       <div><label for="filterNama" class="block text-sm font-medium text-gray-700 mb-1">Guru/Karyawan</label> <select id="filterNama" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"> <option value="">Semua</option> </select>
+       </div>
+       <div><label for="filterTanggalMulai" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label> <input type="date" id="filterTanggalMulai" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+       </div>
+       <div><label for="filterTanggalAkhir" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label> <input type="date" id="filterTanggalAkhir" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+       </div>
+       <div class="flex items-end"><button onclick="filterAbsensi()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium w-full">🔍 Filter</button>
+       </div>
+      </div>
+      <div class="mt-4 flex gap-2"><button onclick="cetakPDF()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium">🖨️ Cetak PDF</button> <button onclick="backupData()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium">💾 Backup</button> <button onclick="restoreData()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium">📥 Restore</button> <button onclick="syncData()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Syncron</button>
+      </div>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Data Absensi</h2>
+      <p class="text-sm text-gray-600 mb-4">Klik tombol <strong>✏️ Edit</strong> untuk mengisi jam pulang</p>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Masuk</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Pulang</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase no-print">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="absensiList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Ajuan Izin Page -->
+    <div id="page-ajuanIzin" class="page-content hidden">
+     <div class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Ajuan Izin Online</h2>
+      <form id="formIzin" class="space-y-4">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="namaIzin" class="block text-sm font-medium text-gray-700 mb-1">Nama</label> <select id="namaIzin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="">Pilih Guru/Karyawan</option> </select>
+        </div>
+        <div><label for="tanggalIzin" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Izin</label> <input type="date" id="tanggalIzin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+       </div>
+       <div><label for="alasanIzin" class="block text-sm font-medium text-gray-700 mb-1">Alasan Izin</label> <textarea id="alasanIzin" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required></textarea>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">📤 Ajukan Izin</button> <button type="button" onclick="resetFormIzin()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Reset</button>
+       </div>
+      </form>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Ajuan Izin</h2>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alasan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="izinList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Ajuan Cuti Page -->
+    <div id="page-ajuanCuti" class="page-content hidden">
+     <div class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Ajuan Cuti</h2>
+      <form id="formCuti" class="space-y-4">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="namaCuti" class="block text-sm font-medium text-gray-700 mb-1">Nama</label> <select id="namaCuti" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="">Pilih Guru/Karyawan</option> </select>
+        </div>
+        <div><label for="jenisCuti" class="block text-sm font-medium text-gray-700 mb-1">Jenis Cuti</label> <select id="jenisCuti" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="Cuti Tahunan">Cuti Tahunan</option> <option value="Cuti Sakit">Cuti Sakit</option> <option value="Cuti Melahirkan">Cuti Melahirkan</option> <option value="Cuti Khusus">Cuti Khusus</option> </select>
+        </div>
+       </div>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="tanggalMulaiCuti" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label> <input type="date" id="tanggalMulaiCuti" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        <div><label for="tanggalAkhirCuti" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label> <input type="date" id="tanggalAkhirCuti" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+       </div>
+       <div><label for="alasanCuti" class="block text-sm font-medium text-gray-700 mb-1">Alasan Cuti</label> <textarea id="alasanCuti" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required></textarea>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">📤 Ajukan Cuti</button> <button type="button" onclick="resetFormCuti()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Reset</button>
+       </div>
+      </form>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Ajuan Cuti</h2>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Mulai</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Akhir</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alasan</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="cutiList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Kartu Absen Page -->
+    <div id="page-kartuAbsen" class="page-content hidden">
+     <div class="card p-6 mb-6 no-print">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Cetak Kartu Absen Bulanan</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+       <div><label for="kartuNama" class="block text-sm font-medium text-gray-700 mb-1">Pilih Guru/Karyawan</label> <select id="kartuNama" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"> <option value="">Pilih Guru/Karyawan</option> </select>
+       </div>
+       <div><label for="kartuBulan" class="block text-sm font-medium text-gray-700 mb-1">Bulan</label> <select id="kartuBulan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"> <option value="01">Januari</option> <option value="02">Februari</option> <option value="03">Maret</option> <option value="04">April</option> <option value="05">Mei</option> <option value="06">Juni</option> <option value="07">Juli</option> <option value="08">Agustus</option> <option value="09">September</option> <option value="10">Oktober</option> <option value="11">November</option> <option value="12">Desember</option> </select>
+       </div>
+       <div><label for="kartuTahun" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label> <input type="number" id="kartuTahun" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" value="2024">
+       </div>
+      </div>
+      <div class="mt-4"><button onclick="generateKartuAbsen()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium mr-2">📋 Tampilkan Kartu</button> <button onclick="cetakKartuAbsen()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium">🖨️ Cetak PDF</button>
+      </div>
+     </div>
+     <div id="kartuAbsenPreview" class="card p-6">
+      <div class="text-center text-gray-500">
+       Pilih guru/karyawan dan periode untuk menampilkan kartu absen
+      </div>
+     </div>
+    </div><!-- Hari Libur Page -->
+    <div id="page-hariLibur" class="page-content hidden">
+     <div class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Tambah Hari Libur</h2>
+      <form id="formLibur" class="space-y-4">
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><label for="tanggalLibur" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label> <input type="date" id="tanggalLibur" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        <div><label for="namaLibur" class="block text-sm font-medium text-gray-700 mb-1">Nama Hari Libur</label> <input type="text" id="namaLibur" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        <div><label for="jenisLibur" class="block text-sm font-medium text-gray-700 mb-1">Jenis Libur</label> <select id="jenisLibur" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required> <option value="Libur Nasional">Libur Nasional</option> <option value="Libur Keagamaan">Libur Keagamaan</option> <option value="Libur Sekolah">Libur Sekolah</option> <option value="Libur Khusus">Libur Khusus</option> <option value="Lainnya">Lainnya</option> </select>
+        </div>
+       </div>
+       <div class="flex gap-2"><button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">💾 Simpan</button> <button type="button" onclick="resetFormLibur()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">🔄 Reset</button>
+       </div>
+      </form>
+     </div>
+     <div class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Hari Libur</h2>
+      <p class="text-sm text-gray-600 mb-4">Hari kerja: Senin - Sabtu</p>
+      <div class="overflow-x-auto">
+       <table class="min-w-full">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Hari Libur</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+         </tr>
+        </thead>
+        <tbody id="liburList" class="bg-white divide-y divide-gray-200">
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    let allData = [];
+    let currentEditId = null;
+    let currentEditType = null;
+
+    const defaultConfig = {
+      app_title: "MADRASAH IBTIDAIYAH RIYADLATUL UQUL NGADILUWIH",
+      app_subtitle: "Sistem Absensi Guru dan Karyawan"
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allData = data;
+        updateAllViews();
+      }
+    };
+
+    async function initApp() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          showToast("Gagal menginisialisasi sistem", "error");
+        }
+      }
+
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const appTitle = document.getElementById('appTitle');
+            const appSubtitle = document.getElementById('appSubtitle');
+            
+            if (appTitle) {
+              appTitle.textContent = config.app_title || defaultConfig.app_title;
+            }
+            if (appSubtitle) {
+              appSubtitle.textContent = config.app_subtitle || defaultConfig.app_subtitle;
+            }
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["app_title", config.app_title || defaultConfig.app_title],
+            ["app_subtitle", config.app_subtitle || defaultConfig.app_subtitle]
+          ])
+        });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tanggalAbsen').value = today;
+      
+      const currentMonth = new Date().getMonth() + 1;
+      document.getElementById('kartuBulan').value = currentMonth.toString().padStart(2, '0');
+
+      showPage('dashboard');
+    }
+
+    function updateAllViews() {
+      updateDashboard();
+      updateGuruList();
+      updateAbsensiList();
+      updateIzinList();
+      updateCutiList();
+      updateLiburList();
+      updateDropdowns();
+    }
+
+    function updateDashboard() {
+      const guru = allData.filter(d => d.type === 'guru');
+      const today = new Date().toISOString().split('T')[0];
+      const absensiToday = allData.filter(d => d.type === 'absensi' && d.tanggal === today);
+      
+      const hadir = absensiToday.filter(a => a.status === 'Hadir').length;
+      const izinSakit = absensiToday.filter(a => a.status === 'Izin' || a.status === 'Sakit').length;
+      const terlambat = absensiToday.filter(a => a.keterangan && a.keterangan.includes('Terlambat')).length;
+
+      document.getElementById('totalGuru').textContent = guru.length;
+      document.getElementById('hadirHariIni').textContent = hadir;
+      document.getElementById('izinSakit').textContent = izinSakit;
+      document.getElementById('terlambat').textContent = terlambat;
+
+      const tbody = document.getElementById('dashboardAbsensiList');
+      tbody.innerHTML = '';
+      
+      absensiToday.forEach(absen => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${absen.nama}</td>
+          <td class="px-4 py-3 text-sm">${absen.jabatan}</td>
+          <td class="px-4 py-3 text-sm">${absen.jamMasuk || '-'}</td>
+          <td class="px-4 py-3 text-sm">${absen.jamPulang || '-'}</td>
+          <td class="px-4 py-3 text-sm">
+            <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(absen.status)}">
+              ${absen.status}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (absensiToday.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-center text-gray-500">Belum ada absensi hari ini</td></tr>';
+      }
+    }
+
+    function updateGuruList() {
+      const guru = allData.filter(d => d.type === 'guru');
+      const tbody = document.getElementById('guruList');
+      tbody.innerHTML = '';
+      
+      guru.forEach((g, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${index + 1}</td>
+          <td class="px-4 py-3 text-sm font-medium">${g.nama}</td>
+          <td class="px-4 py-3 text-sm">${g.jabatan}</td>
+          <td class="px-4 py-3 text-sm">
+            <button onclick="editGuru('${g.__backendId}')" class="text-blue-600 hover:text-blue-800 mr-2">✏️ Edit</button>
+            <button onclick="deleteGuru('${g.__backendId}')" class="text-red-600 hover:text-red-800">🗑️ Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (guru.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-center text-gray-500">Belum ada data guru/karyawan</td></tr>';
+      }
+    }
+
+    function updateAbsensiList() {
+      const absensi = allData.filter(d => d.type === 'absensi');
+      const tbody = document.getElementById('absensiList');
+      tbody.innerHTML = '';
+      
+      absensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${formatTanggal(a.tanggal)}</td>
+          <td class="px-4 py-3 text-sm font-medium">${a.nama}</td>
+          <td class="px-4 py-3 text-sm">${a.jabatan}</td>
+          <td class="px-4 py-3 text-sm">${a.jamMasuk || '-'}</td>
+          <td class="px-4 py-3 text-sm">${a.jamPulang || '<span class="text-orange-500 font-medium">Belum Pulang</span>'}</td>
+          <td class="px-4 py-3 text-sm">
+            <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(a.status)}">
+              ${a.status}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-sm">${a.keterangan || '-'}</td>
+          <td class="px-4 py-3 text-sm no-print">
+            <button onclick="editJamPulang('${a.__backendId}')" class="text-blue-600 hover:text-blue-800 mr-2">✏️ Edit</button>
+            <button onclick="deleteAbsensi('${a.__backendId}')" class="text-red-600 hover:text-red-800">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (absensi.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-3 text-center text-gray-500">Belum ada data absensi</td></tr>';
+      }
+    }
+
+    function updateIzinList() {
+      const izin = allData.filter(d => d.type === 'izin');
+      const tbody = document.getElementById('izinList');
+      tbody.innerHTML = '';
+      
+      izin.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(i => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${formatTanggal(i.tanggal)}</td>
+          <td class="px-4 py-3 text-sm font-medium">${i.nama}</td>
+          <td class="px-4 py-3 text-sm">${i.keterangan}</td>
+          <td class="px-4 py-3 text-sm">
+            <button onclick="deleteIzin('${i.__backendId}')" class="text-red-600 hover:text-red-800">🗑️ Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (izin.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-center text-gray-500">Belum ada ajuan izin</td></tr>';
+      }
+    }
+
+    function updateCutiList() {
+      const cuti = allData.filter(d => d.type === 'cuti');
+      const tbody = document.getElementById('cutiList');
+      tbody.innerHTML = '';
+      
+      cuti.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm font-medium">${c.nama}</td>
+          <td class="px-4 py-3 text-sm">${c.jabatan}</td>
+          <td class="px-4 py-3 text-sm">${formatTanggal(c.tanggal)}</td>
+          <td class="px-4 py-3 text-sm">${formatTanggal(c.jamMasuk)}</td>
+          <td class="px-4 py-3 text-sm">${c.keterangan}</td>
+          <td class="px-4 py-3 text-sm">
+            <button onclick="deleteCuti('${c.__backendId}')" class="text-red-600 hover:text-red-800">🗑️ Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (cuti.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-3 text-center text-gray-500">Belum ada ajuan cuti</td></tr>';
+      }
+    }
+
+    function updateLiburList() {
+      const libur = allData.filter(d => d.type === 'libur');
+      const tbody = document.getElementById('liburList');
+      tbody.innerHTML = '';
+      
+      libur.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).forEach(l => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${formatTanggal(l.tanggal)}</td>
+          <td class="px-4 py-3 text-sm font-medium">${l.nama}</td>
+          <td class="px-4 py-3 text-sm">${l.jabatan}</td>
+          <td class="px-4 py-3 text-sm">
+            <button onclick="deleteLibur('${l.__backendId}')" class="text-red-600 hover:text-red-800">🗑️ Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (libur.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-center text-gray-500">Belum ada data hari libur</td></tr>';
+      }
+    }
+
+    function updateDropdowns() {
+      const guru = allData.filter(d => d.type === 'guru');
+      
+      const selects = ['namaAbsen', 'filterNama', 'namaIzin', 'namaCuti', 'kartuNama'];
+      selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Pilih Guru/Karyawan</option>';
+        
+        guru.forEach(g => {
+          const option = document.createElement('option');
+          option.value = g.nama;
+          option.textContent = g.nama;
+          option.dataset.jabatan = g.jabatan;
+          select.appendChild(option);
+        });
+        
+        if (currentValue) {
+          select.value = currentValue;
+        }
+      });
+    }
+
+    function showPage(pageName) {
+      document.querySelectorAll('.page-content').forEach(page => {
+        page.classList.add('hidden');
+      });
+      
+      document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+        tab.classList.remove('btn-primary', 'text-white');
+        tab.classList.add('bg-white', 'text-gray-700', 'hover:bg-gray-100');
+      });
+      
+      document.getElementById(`page-${pageName}`).classList.remove('hidden');
+      const activeTab = document.getElementById(`tab-${pageName}`);
+      activeTab.classList.add('btn-primary', 'text-white');
+      activeTab.classList.remove('bg-white', 'text-gray-700', 'hover:bg-gray-100');
+    }
+
+    document.getElementById('formGuru').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (allData.filter(d => d.type === 'guru').length >= 999) {
+        showToast('Batas maksimum 999 data guru/karyawan telah tercapai', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Menyimpan...';
+      btn.disabled = true;
+
+      const data = {
+        type: 'guru',
+        nama: document.getElementById('namaGuru').value,
+        jabatan: document.getElementById('jabatanGuru').value,
+        createdAt: new Date().toISOString()
+      };
+
+      let result;
+      if (currentEditId && currentEditType === 'guru') {
+        const record = allData.find(d => d.__backendId === currentEditId);
+        result = await window.dataSdk.update({ ...record, ...data });
+        currentEditId = null;
+        currentEditType = null;
+      } else {
+        result = await window.dataSdk.create(data);
+      }
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.isOk) {
+        showToast('Data berhasil disimpan', 'success');
+        resetFormGuru();
+      } else {
+        showToast('Gagal menyimpan data', 'error');
+      }
+    });
+
+    document.getElementById('formAbsensi').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (allData.filter(d => d.type === 'absensi').length >= 999) {
+        showToast('Batas maksimum 999 data absensi telah tercapai', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Menyimpan...';
+      btn.disabled = true;
+
+      const jamMasuk = document.getElementById('jamMasuk').value;
+      let keterangan = document.getElementById('keteranganAbsen').value;
+
+      if (jamMasuk) {
+        const [hours, minutes] = jamMasuk.split(':').map(Number);
+        if (hours > 7 || (hours === 7 && minutes > 30)) {
+          keterangan = keterangan ? `Terlambat. ${keterangan}` : 'Terlambat';
+        }
+      }
+
+      const data = {
+        type: 'absensi',
+        nama: document.getElementById('namaAbsen').value,
+        jabatan: document.getElementById('jabatanAbsen').value,
+        tanggal: document.getElementById('tanggalAbsen').value,
+        jamMasuk: jamMasuk,
+        jamPulang: '',
+        status: document.getElementById('statusAbsen').value,
+        keterangan: keterangan,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(data);
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.isOk) {
+        showToast('Absensi berhasil disimpan', 'success');
+        resetFormAbsensi();
+      } else {
+        showToast('Gagal menyimpan absensi', 'error');
+      }
+    });
+
+    document.getElementById('formIzin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (allData.filter(d => d.type === 'izin').length >= 999) {
+        showToast('Batas maksimum 999 ajuan izin telah tercapai', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Mengajukan...';
+      btn.disabled = true;
+
+      const data = {
+        type: 'izin',
+        nama: document.getElementById('namaIzin').value,
+        tanggal: document.getElementById('tanggalIzin').value,
+        keterangan: document.getElementById('alasanIzin').value,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(data);
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.isOk) {
+        showToast('Ajuan izin berhasil disimpan', 'success');
+        resetFormIzin();
+      } else {
+        showToast('Gagal menyimpan ajuan izin', 'error');
+      }
+    });
+
+    document.getElementById('formCuti').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (allData.filter(d => d.type === 'cuti').length >= 999) {
+        showToast('Batas maksimum 999 ajuan cuti telah tercapai', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Mengajukan...';
+      btn.disabled = true;
+
+      const data = {
+        type: 'cuti',
+        nama: document.getElementById('namaCuti').value,
+        jabatan: document.getElementById('jenisCuti').value,
+        tanggal: document.getElementById('tanggalMulaiCuti').value,
+        jamMasuk: document.getElementById('tanggalAkhirCuti').value,
+        keterangan: document.getElementById('alasanCuti').value,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(data);
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.isOk) {
+        showToast('Ajuan cuti berhasil disimpan', 'success');
+        resetFormCuti();
+      } else {
+        showToast('Gagal menyimpan ajuan cuti', 'error');
+      }
+    });
+
+    document.getElementById('formLibur').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (allData.filter(d => d.type === 'libur').length >= 999) {
+        showToast('Batas maksimum 999 hari libur telah tercapai', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Menyimpan...';
+      btn.disabled = true;
+
+      const data = {
+        type: 'libur',
+        tanggal: document.getElementById('tanggalLibur').value,
+        nama: document.getElementById('namaLibur').value,
+        jabatan: document.getElementById('jenisLibur').value,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(data);
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.isOk) {
+        showToast('Hari libur berhasil disimpan', 'success');
+        resetFormLibur();
+      } else {
+        showToast('Gagal menyimpan hari libur', 'error');
+      }
+    });
+
+    document.getElementById('namaAbsen').addEventListener('change', (e) => {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      document.getElementById('jabatanAbsen').value = selectedOption.dataset.jabatan || '';
+    });
+
+    function setJamSekarang(fieldId) {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById(fieldId).value = `${hours}:${minutes}`;
+
+      if (fieldId === 'jamMasuk') {
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        const lateTime = 7 * 60 + 30;
+        
+        if (currentTime > lateTime) {
+          const keteranganField = document.getElementById('keteranganAbsen');
+          if (!keteranganField.value.includes('Terlambat')) {
+            keteranganField.value = keteranganField.value ? `Terlambat. ${keteranganField.value}` : 'Terlambat';
+          }
+        }
+      }
+    }
+
+    async function editGuru(id) {
+      const guru = allData.find(d => d.__backendId === id);
+      if (guru) {
+        document.getElementById('namaGuru').value = guru.nama;
+        document.getElementById('jabatanGuru').value = guru.jabatan;
+        document.getElementById('btnGuruText').textContent = '💾 Update';
+        currentEditId = id;
+        currentEditType = 'guru';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    async function deleteGuru(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (record) {
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmDiv.innerHTML = `
+          <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+            <h3 class="text-lg font-bold mb-4">Konfirmasi Hapus</h3>
+            <p class="mb-6">Yakin ingin menghapus data ini?</p>
+            <div class="flex gap-2 justify-end">
+              <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
+              <button onclick="confirmDeleteGuru('${id}')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(confirmDiv);
+      }
+    }
+
+    async function confirmDeleteGuru(id) {
+      const record = allData.find(d => d.__backendId === id);
+      document.querySelector('.fixed.inset-0').remove();
+      
+      const result = await window.dataSdk.delete(record);
+      if (result.isOk) {
+        showToast('Data berhasil dihapus', 'success');
+      } else {
+        showToast('Gagal menghapus data', 'error');
+      }
+    }
+
+    function editJamPulang(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (!record) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <h3 class="text-lg font-bold mb-4">Edit Jam Pulang</h3>
+          <div class="mb-4">
+            <p class="text-sm text-gray-600 mb-2"><strong>Nama:</strong> ${record.nama}</p>
+            <p class="text-sm text-gray-600 mb-2"><strong>Tanggal:</strong> ${formatTanggal(record.tanggal)}</p>
+            <p class="text-sm text-gray-600 mb-4"><strong>Jam Masuk:</strong> ${record.jamMasuk || '-'}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang</label>
+            <div class="flex gap-2">
+              <input type="time" id="editJamPulang" value="${record.jamPulang || ''}" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+              <button onclick="setCurrentTimeToEdit()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">🕐 Sekarang</button>
+            </div>
+          </div>
+          <div class="flex gap-2 justify-end">
+            <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
+            <button onclick="saveJamPulang('${id}')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">💾 Simpan</button>
+          </div>
+        </div>
+      `;
+      modal.id = 'editModal';
+      document.body.appendChild(modal);
+    }
+
+    function setCurrentTimeToEdit() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('editJamPulang').value = `${hours}:${minutes}`;
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('editModal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    async function saveJamPulang(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (!record) return;
+
+      const jamPulang = document.getElementById('editJamPulang').value;
+      
+      if (!jamPulang) {
+        showToast('Silakan isi jam pulang', 'error');
+        return;
+      }
+
+      const updatedRecord = { ...record, jamPulang: jamPulang };
+      const result = await window.dataSdk.update(updatedRecord);
+
+      if (result.isOk) {
+        showToast('Jam pulang berhasil disimpan', 'success');
+        closeEditModal();
+      } else {
+        showToast('Gagal menyimpan jam pulang', 'error');
+      }
+    }
+
+    async function deleteAbsensi(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (record) {
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmDiv.innerHTML = `
+          <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+            <h3 class="text-lg font-bold mb-4">Konfirmasi Hapus</h3>
+            <p class="mb-6">Yakin ingin menghapus data absensi ini?</p>
+            <div class="flex gap-2 justify-end">
+              <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
+              <button onclick="confirmDeleteAbsensi('${id}')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(confirmDiv);
+      }
+    }
+
+    async function confirmDeleteAbsensi(id) {
+      const record = allData.find(d => d.__backendId === id);
+      document.querySelector('.fixed.inset-0').remove();
+      
+      const result = await window.dataSdk.delete(record);
+      if (result.isOk) {
+        showToast('Absensi berhasil dihapus', 'success');
+      } else {
+        showToast('Gagal menghapus absensi', 'error');
+      }
+    }
+
+    async function deleteIzin(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (record) {
+        const result = await window.dataSdk.delete(record);
+        if (result.isOk) {
+          showToast('Ajuan izin berhasil dihapus', 'success');
+        } else {
+          showToast('Gagal menghapus ajuan izin', 'error');
+        }
+      }
+    }
+
+    async function deleteCuti(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (record) {
+        const result = await window.dataSdk.delete(record);
+        if (result.isOk) {
+          showToast('Ajuan cuti berhasil dihapus', 'success');
+        } else {
+          showToast('Gagal menghapus ajuan cuti', 'error');
+        }
+      }
+    }
+
+    async function deleteLibur(id) {
+      const record = allData.find(d => d.__backendId === id);
+      if (record) {
+        const result = await window.dataSdk.delete(record);
+        if (result.isOk) {
+          showToast('Hari libur berhasil dihapus', 'success');
+        } else {
+          showToast('Gagal menghapus hari libur', 'error');
+        }
+      }
+    }
+
+    async function importBulkData() {
+      const text = document.getElementById('bulkImport').value.trim();
+      if (!text) {
+        showToast('Masukkan data untuk diimport', 'error');
+        return;
+      }
+
+      const lines = text.split('\n').filter(line => line.trim());
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const line of lines) {
+        const parts = line.split('|').map(p => p.trim());
+        if (parts.length >= 2) {
+          if (allData.filter(d => d.type === 'guru').length >= 999) {
+            showToast('Batas maksimum 999 data tercapai', 'error');
+            break;
+          }
+
+          const data = {
+            type: 'guru',
+            nama: parts[0],
+            jabatan: parts[1],
+            createdAt: new Date().toISOString()
+          };
+
+          const result = await window.dataSdk.create(data);
+          if (result.isOk) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        }
+      }
+
+      document.getElementById('bulkImport').value = '';
+      showToast(`Import selesai: ${successCount} berhasil, ${errorCount} gagal`, 'success');
+    }
+
+    function filterAbsensi() {
+      const nama = document.getElementById('filterNama').value;
+      const tanggalMulai = document.getElementById('filterTanggalMulai').value;
+      const tanggalAkhir = document.getElementById('filterTanggalAkhir').value;
+
+      let filtered = allData.filter(d => d.type === 'absensi');
+
+      if (nama) {
+        filtered = filtered.filter(d => d.nama === nama);
+      }
+
+      if (tanggalMulai) {
+        filtered = filtered.filter(d => d.tanggal >= tanggalMulai);
+      }
+
+      if (tanggalAkhir) {
+        filtered = filtered.filter(d => d.tanggal <= tanggalAkhir);
+      }
+
+      const tbody = document.getElementById('absensiList');
+      tbody.innerHTML = '';
+      
+      filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-sm">${formatTanggal(a.tanggal)}</td>
+          <td class="px-4 py-3 text-sm font-medium">${a.nama}</td>
+          <td class="px-4 py-3 text-sm">${a.jabatan}</td>
+          <td class="px-4 py-3 text-sm">${a.jamMasuk || '-'}</td>
+          <td class="px-4 py-3 text-sm">${a.jamPulang || '-'}</td>
+          <td class="px-4 py-3 text-sm">
+            <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(a.status)}">
+              ${a.status}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-sm">${a.keterangan || '-'}</td>
+          <td class="px-4 py-3 text-sm no-print">
+            <button onclick="deleteAbsensi('${a.__backendId}')" class="text-red-600 hover:text-red-800">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-3 text-center text-gray-500">Tidak ada data yang sesuai filter</td></tr>';
+      }
+
+      showToast(`Menampilkan ${filtered.length} data`, 'success');
+    }
+
+    function cetakPDF() {
+      // Buat preview khusus untuk PDF
+      const printWindow = window.open('', '_blank');
+      const printContent = generatePrintContent();
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Data Absensi - ${new Date().toLocaleDateString('id-ID')}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              font-size: 12px;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              border-bottom: 2px solid #333;
+              padding-bottom: 15px;
+            }
+            .header h1 { 
+              margin: 0; 
+              font-size: 18px; 
+              font-weight: bold;
+            }
+            .header h2 { 
+              margin: 5px 0; 
+              font-size: 14px; 
+              color: #666;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 20px;
+            }
+            th, td { 
+              border: 1px solid #333; 
+              padding: 8px; 
+              text-align: left;
+              font-size: 11px;
+            }
+            th { 
+              background-color: #f5f5f5; 
+              font-weight: bold;
+            }
+            .status-hadir { color: #059669; font-weight: bold; }
+            .status-izin { color: #d97706; font-weight: bold; }
+            .status-sakit { color: #dc2626; font-weight: bold; }
+            .status-cuti { color: #2563eb; font-weight: bold; }
+            .footer { 
+              margin-top: 30px; 
+              text-align: right; 
+              font-size: 10px; 
+              color: #666;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+          <div class="footer">
+            <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // Tunggu konten dimuat lalu print
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+    }
+
+    function generatePrintContent() {
+      const nama = document.getElementById('filterNama').value;
+      const tanggalMulai = document.getElementById('filterTanggalMulai').value;
+      const tanggalAkhir = document.getElementById('filterTanggalAkhir').value;
+
+      let filtered = allData.filter(d => d.type === 'absensi');
+
+      if (nama) {
+        filtered = filtered.filter(d => d.nama === nama);
+      }
+
+      if (tanggalMulai) {
+        filtered = filtered.filter(d => d.tanggal >= tanggalMulai);
+      }
+
+      if (tanggalAkhir) {
+        filtered = filtered.filter(d => d.tanggal <= tanggalAkhir);
+      }
+
+      filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+      const filterInfo = [];
+      if (nama) filterInfo.push(`Guru/Karyawan: ${nama}`);
+      if (tanggalMulai) filterInfo.push(`Dari: ${formatTanggal(tanggalMulai)}`);
+      if (tanggalAkhir) filterInfo.push(`Sampai: ${formatTanggal(tanggalAkhir)}`);
+
+      return `
+        <div class="header">
+          <h1>MADRASAH IBTIDAIYAH RIYADLATUL UQUL NGADILUWIH</h1>
+          <h2>LAPORAN DATA ABSENSI</h2>
+          ${filterInfo.length > 0 ? `<p style="margin-top: 10px; font-size: 12px;">${filterInfo.join(' | ')}</p>` : ''}
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 10%;">No</th>
+              <th style="width: 12%;">Tanggal</th>
+              <th style="width: 20%;">Nama</th>
+              <th style="width: 15%;">Jabatan</th>
+              <th style="width: 10%;">Jam Masuk</th>
+              <th style="width: 10%;">Jam Pulang</th>
+              <th style="width: 8%;">Status</th>
+              <th style="width: 15%;">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.length > 0 ? filtered.map((a, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${formatTanggal(a.tanggal)}</td>
+                <td style="font-weight: bold;">${a.nama}</td>
+                <td>${a.jabatan}</td>
+                <td>${a.jamMasuk || '-'}</td>
+                <td>${a.jamPulang || '-'}</td>
+                <td class="status-${a.status.toLowerCase()}">${a.status}</td>
+                <td>${a.keterangan || '-'}</td>
+              </tr>
+            `).join('') : '<tr><td colspan="8" style="text-align: center; color: #666;">Tidak ada data absensi</td></tr>'}
+          </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>Ringkasan:</strong></p>
+            <p>Total Data: ${filtered.length}</p>
+            <p>Hadir: ${filtered.filter(a => a.status === 'Hadir').length}</p>
+            <p>Izin: ${filtered.filter(a => a.status === 'Izin').length}</p>
+            <p>Sakit: ${filtered.filter(a => a.status === 'Sakit').length}</p>
+            <p>Cuti: ${filtered.filter(a => a.status === 'Cuti').length}</p>
+          </div>
+          <div style="text-align: right;">
+            <p>Ngadiluwih, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            <br><br><br>
+            <p>_________________________</p>
+            <p>Kepala Madrasah</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function backupData() {
+      const backup = JSON.stringify(allData, null, 2);
+      const textarea = document.createElement('textarea');
+      textarea.value = backup;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '50%';
+      textarea.style.left = '50%';
+      textarea.style.transform = 'translate(-50%, -50%)';
+      textarea.style.width = '80%';
+      textarea.style.height = '80%';
+      textarea.style.zIndex = '9999';
+      textarea.style.padding = '20px';
+      textarea.style.border = '2px solid #667eea';
+      textarea.style.borderRadius = '8px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.inset = '0';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      overlay.style.zIndex = '9998';
+      overlay.onclick = () => {
+        document.body.removeChild(textarea);
+        document.body.removeChild(overlay);
+      };
+      document.body.appendChild(overlay);
+      
+      showToast('Copy data backup dari textarea yang muncul', 'success');
+    }
+
+    function restoreData() {
+      const input = document.createElement('textarea');
+      input.placeholder = 'Paste data backup di sini...';
+      input.style.position = 'fixed';
+      input.style.top = '50%';
+      input.style.left = '50%';
+      input.style.transform = 'translate(-50%, -50%)';
+      input.style.width = '80%';
+      input.style.height = '80%';
+      input.style.zIndex = '9999';
+      input.style.padding = '20px';
+      input.style.border = '2px solid #667eea';
+      input.style.borderRadius = '8px';
+      
+      const btnContainer = document.createElement('div');
+      btnContainer.style.position = 'fixed';
+      btnContainer.style.top = '10%';
+      btnContainer.style.left = '50%';
+      btnContainer.style.transform = 'translateX(-50%)';
+      btnContainer.style.zIndex = '10000';
+      btnContainer.style.display = 'flex';
+      btnContainer.style.gap = '10px';
+      
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = '📥 Restore';
+      restoreBtn.className = 'btn-primary text-white px-6 py-2 rounded-lg font-medium';
+      restoreBtn.onclick = async () => {
+        try {
+          const data = JSON.parse(input.value);
+          if (Array.isArray(data)) {
+            for (const item of data) {
+              if (!item.__backendId) {
+                await window.dataSdk.create(item);
+              }
+            }
+            showToast('Data berhasil direstore', 'success');
+            cleanup();
+          } else {
+            showToast('Format data tidak valid', 'error');
+          }
+        } catch (error) {
+          showToast('Gagal memproses data backup', 'error');
+        }
+      };
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '❌ Batal';
+      cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium';
+      cancelBtn.onclick = cleanup;
+      
+      btnContainer.appendChild(restoreBtn);
+      btnContainer.appendChild(cancelBtn);
+      
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.inset = '0';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      overlay.style.zIndex = '9998';
+      
+      function cleanup() {
+        document.body.removeChild(input);
+        document.body.removeChild(btnContainer);
+        document.body.removeChild(overlay);
+      }
+      
+      document.body.appendChild(overlay);
+      document.body.appendChild(input);
+      document.body.appendChild(btnContainer);
+      input.focus();
+    }
+
+    function syncData() {
+      showToast('Data telah tersinkronisasi dengan Canva Sheet', 'success');
+    }
+
+    function generateKartuAbsen() {
+      const nama = document.getElementById('kartuNama').value;
+      const bulan = document.getElementById('kartuBulan').value;
+      const tahun = document.getElementById('kartuTahun').value;
+
+      if (!nama) {
+        showToast('Pilih guru/karyawan terlebih dahulu', 'error');
+        return;
+      }
+
+      const guru = allData.find(d => d.type === 'guru' && d.nama === nama);
+      const absensi = allData.filter(d => 
+        d.type === 'absensi' && 
+        d.nama === nama && 
+        d.tanggal.startsWith(`${tahun}-${bulan}`)
+      );
+
+      const bulanNama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const preview = document.getElementById('kartuAbsenPreview');
+      preview.innerHTML = `
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">KARTU ABSENSI BULANAN</h2>
+          <p class="text-lg text-gray-600 mt-2">MADRASAH IBTIDAIYAH RIYADLATUL UQUL NGADILUWIH</p>
+        </div>
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-600">Nama</p>
+              <p class="font-semibold">${nama}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600">Jabatan</p>
+              <p class="font-semibold">${guru ? guru.jabatan : '-'}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600">Bulan</p>
+              <p class="font-semibold">${bulanNama[parseInt(bulan) - 1]} ${tahun}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600">Total Hadir</p>
+              <p class="font-semibold">${absensi.filter(a => a.status === 'Hadir').length} hari</p>
+            </div>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse border border-gray-300">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border border-gray-300 px-4 py-2 text-left">Tanggal</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Jam Masuk</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Jam Pulang</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${absensi.length > 0 ? absensi.map(a => `
+                <tr>
+                  <td class="border border-gray-300 px-4 py-2">${formatTanggal(a.tanggal)}</td>
+                  <td class="border border-gray-300 px-4 py-2">${a.jamMasuk || '-'}</td>
+                  <td class="border border-gray-300 px-4 py-2">${a.jamPulang || '-'}</td>
+                  <td class="border border-gray-300 px-4 py-2">${a.status}</td>
+                  <td class="border border-gray-300 px-4 py-2">${a.keterangan || '-'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5" class="border border-gray-300 px-4 py-2 text-center text-gray-500">Tidak ada data absensi</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-6 text-right text-sm text-gray-600">
+          <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        </div>
+      `;
+    }
+
+    function cetakKartuAbsen() {
+      const nama = document.getElementById('kartuNama').value;
+      const bulan = document.getElementById('kartuBulan').value;
+      const tahun = document.getElementById('kartuTahun').value;
+      
+      if (!nama) {
+        showToast('Generate kartu absen terlebih dahulu', 'error');
+        return;
+      }
+
+      const guru = allData.find(d => d.type === 'guru' && d.nama === nama);
+      const absensi = allData.filter(d => 
+        d.type === 'absensi' && 
+        d.nama === nama && 
+        d.tanggal.startsWith(`${tahun}-${bulan}`)
+      );
+
+      const bulanNama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const printWindow = window.open('', '_blank');
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Kartu Absen ${nama} - ${bulanNama[parseInt(bulan) - 1]} ${tahun}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              font-size: 12px;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              border-bottom: 2px solid #333;
+              padding-bottom: 15px;
+            }
+            .header h1 { 
+              margin: 0; 
+              font-size: 18px; 
+              font-weight: bold;
+            }
+            .header h2 { 
+              margin: 5px 0; 
+              font-size: 14px; 
+              color: #666;
+            }
+            .info-box {
+              background-color: #f8f9fa;
+              border: 1px solid #dee2e6;
+              border-radius: 5px;
+              padding: 15px;
+              margin-bottom: 20px;
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+            }
+            .info-item {
+              display: flex;
+              flex-direction: column;
+            }
+            .info-label {
+              font-size: 10px;
+              color: #666;
+              margin-bottom: 2px;
+            }
+            .info-value {
+              font-weight: bold;
+              font-size: 12px;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 20px;
+            }
+            th, td { 
+              border: 1px solid #333; 
+              padding: 8px; 
+              text-align: left;
+              font-size: 11px;
+            }
+            th { 
+              background-color: #f5f5f5; 
+              font-weight: bold;
+            }
+            .status-hadir { color: #059669; font-weight: bold; }
+            .status-izin { color: #d97706; font-weight: bold; }
+            .status-sakit { color: #dc2626; font-weight: bold; }
+            .status-cuti { color: #2563eb; font-weight: bold; }
+            .footer { 
+              margin-top: 30px; 
+              text-align: right; 
+              font-size: 10px; 
+              color: #666;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>MADRASAH IBTIDAIYAH RIYADLATUL UQUL NGADILUWIH</h1>
+            <h2>KARTU ABSENSI BULANAN</h2>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-item">
+              <span class="info-label">Nama</span>
+              <span class="info-value">${nama}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Jabatan</span>
+              <span class="info-value">${guru ? guru.jabatan : '-'}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Bulan/Tahun</span>
+              <span class="info-value">${bulanNama[parseInt(bulan) - 1]} ${tahun}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Total Hadir</span>
+              <span class="info-value">${absensi.filter(a => a.status === 'Hadir').length} hari</span>
+            </div>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 15%;">Tanggal</th>
+                <th style="width: 15%;">Jam Masuk</th>
+                <th style="width: 15%;">Jam Pulang</th>
+                <th style="width: 15%;">Status</th>
+                <th style="width: 40%;">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${absensi.length > 0 ? absensi.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).map(a => `
+                <tr>
+                  <td>${formatTanggal(a.tanggal)}</td>
+                  <td>${a.jamMasuk || '-'}</td>
+                  <td>${a.jamPulang || '-'}</td>
+                  <td class="status-${a.status.toLowerCase()}">${a.status}</td>
+                  <td>${a.keterangan || '-'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5" style="text-align: center; color: #666;">Tidak ada data absensi untuk bulan ini</td></tr>'}
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+            <div>
+              <p><strong>Ringkasan Kehadiran:</strong></p>
+              <p>Hadir: ${absensi.filter(a => a.status === 'Hadir').length} hari</p>
+              <p>Izin: ${absensi.filter(a => a.status === 'Izin').length} hari</p>
+              <p>Sakit: ${absensi.filter(a => a.status === 'Sakit').length} hari</p>
+              <p>Cuti: ${absensi.filter(a => a.status === 'Cuti').length} hari</p>
+            </div>
+            <div style="text-align: right;">
+              <p>Ngadiluwih, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              <br><br><br>
+              <p>_________________________</p>
+              <p>Kepala Madrasah</p>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // Tunggu konten dimuat lalu print
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+    }
+
+    function resetFormGuru() {
+      document.getElementById('formGuru').reset();
+      document.getElementById('btnGuruText').textContent = '💾 Simpan';
+      currentEditId = null;
+      currentEditType = null;
+    }
+
+    function resetFormAbsensi() {
+      document.getElementById('formAbsensi').reset();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tanggalAbsen').value = today;
+    }
+
+    function resetFormIzin() {
+      document.getElementById('formIzin').reset();
+    }
+
+    function resetFormCuti() {
+      document.getElementById('formCuti').reset();
+    }
+
+    function resetFormLibur() {
+      document.getElementById('formLibur').reset();
+    }
+
+    function formatTanggal(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'Hadir': 'bg-green-100 text-green-800',
+        'Izin': 'bg-yellow-100 text-yellow-800',
+        'Sakit': 'bg-orange-100 text-orange-800',
+        'Cuti': 'bg-blue-100 text-blue-800'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      }`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8fecc43045a146',t:'MTc2NzU4NDExOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
